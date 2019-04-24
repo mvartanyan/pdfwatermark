@@ -63,9 +63,8 @@ def annotate(filename, watermark, regex, font_name, font_size, color, opacity,
     if not destination_file_name:
         destination_file_name = filename
 
-    outputStream = open(destination_file_name, "wb")
-    output.write(outputStream)
-    outputStream.close()
+    with open(destination_file_name, "wb") as output_stream:
+        output.write(output_stream)
 
 
 if __name__ == '__main__':
