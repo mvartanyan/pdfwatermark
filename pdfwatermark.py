@@ -30,8 +30,11 @@ import click
               help='Y coordinate')
 @click.option('-d', '--destination-file-name', default='',
               help='Destination file, by default files are modified in place')
+@click.option('--rotate', default=0, type=int,
+              help='Rotation angle')
+
 def annotate(filename, watermark, regex, font_name, font_size, color, opacity,
-             x, y, destination_file_name):
+             x, y, destination_file_name, rotate):
     mask_stream = BytesIO()
 
     watermark_canvas = canvas.Canvas(mask_stream, pagesize=A4)
@@ -44,6 +47,7 @@ def annotate(filename, watermark, regex, font_name, font_size, color, opacity,
         groups = match(regex, filename)
         watermark = watermark.format(*groups.groups())
 
+    watermark_canvas.rotate(rotate)
     watermark_canvas.drawString(x, y, watermark)
     watermark_canvas.save()
 
