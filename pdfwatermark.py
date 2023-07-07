@@ -1,5 +1,6 @@
 from io import BytesIO
 from re import match
+import math
 
 import click
 from PyPDF2 import PdfReader, PdfWriter
@@ -30,11 +31,24 @@ from webcolors import hex_to_rgb
               help='Y coordinate')
 @click.option('-d', '--destination-file-name', default='',
               help='Destination file, by default files are modified in place')
+@click.option('-a', '--angle', default=0,
+              help='Rotate watermark canvas by x degrees')
 def annotate(filename, watermark, regex, font_name, font_size, color, opacity,
-             x, y, destination_file_name):
+             x, y, destination_file_name, angle):
     mask_stream = BytesIO()
-
     watermark_canvas = canvas.Canvas(mask_stream, pagesize=A4)
+
+    if angle:
+        angle_rad = math.radians(angle)
+        original_center = [A4[0] / 2, A4[1] / 2]
+        new_center = [
+            original_center[0] * math.cos(angle_rad) - original_center[1] * math.sin(angle_rad),
+            original_center[0] * math.sin(angle_rad) + original_center[1] * math.cos(angle_rad)
+        ]
+        translation = [original_center[0] - new_center[0], original_center[1] - new_center[1]]
+        watermark_canvas.translate(translation[0], translation[1])
+        watermark_canvas.rotate(angle)
+
     watermark_canvas.setFont(font_name, font_size)
     r, g, b = hex_to_rgb(color)
     c = Color(r, g, b, alpha=opacity)
